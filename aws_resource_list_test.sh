@@ -1,82 +1,117 @@
 #!/bin/bash
 
-# This script will list all the resources in the AWS account
-# Author: Jabeed
+###############################################################################
+# Author: Abhishek Veeramalla
 # Version: v0.0.1
+
+# Script to automate the process of listing all the resources in an AWS account
 #
-# Following are the supported AWS services by the script
+# Below are the services that are supported by this script:
 # 1. EC2
-# 2. S3
-# 3. RDS
-# 4. DynamoDB
-# 5. Lambda
-# 6. EBS
-# 7. CloudFront
+# 2. RDS
+# 3. S3
+# 4. CloudFront
+# 5. VPC
+# 6. IAM
+# 7. Route53
 # 8. CloudWatch
-# 9. SNS
-# 10. SQS
-# 11. VPC
-# 12. Route53
-# 13. CloudFormation
-# 14. IAM
+# 9. CloudFormation
+# 10. Lambda
+# 11. SNS
+# 12. SQS
+# 13. DynamoDB
+# 14. VPC
+# 15. EBS
+#
+# The script will prompt the user to enter the AWS region and the service for which the resources need to be listed.
+#
+# Usage: ./aws_resource_list.sh  <aws_region> <aws_service>
+# Example: ./aws_resource_list.sh us-east-1 ec2
+#############################################################################
 
-# Usage: ./aws_resource_list_test.sh <region> <service_name>
-# Example: ./aws_resource_list_test.sh us-east-1 EC2
-# To modify the services, edit the GLOBAL_SERVICES and REGIONAL_SERVICES arrays below
-###############################################################################################
-
-# check if the correct number of arguments are passed
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <region> <service_name>"
+# Check if the required number of arguments are passed
+if [ $# -ne 2 ]; then
+    echo "Usage: ./aws_resource_list.sh  <aws_region> <aws_service>"
+    echo "Example: ./aws_resource_list.sh us-east-1 ec2"
     exit 1
 fi
 
-#Check if aws cli is installed
-if ! command -v aws &> /dev/null
-then
-    echo "aws cli could not be found. Please install aws cli to run this script."
-    exit
+# Assign the arguments to variables and convert the service to lowercase
+aws_region=$1
+aws_service=(echo "$2" | tr '[:upper:]' '[:lower:]')
+
+# Check if the AWS CLI is installed
+if ! command -v aws &> /dev/null; then
+    echo "AWS CLI is not installed. Please install the AWS CLI and try again."
+    exit 1
 fi
 
-# Check if the aws cli is configured
+# Check if the AWS CLI is configured
 if [ ! -d ~/.aws ]; then
-    echo "aws cli is not configured. Please configure aws cli to run this script."
+    echo "AWS CLI is not configured. Please configure the AWS CLI and try again."
     exit 1
 fi
 
-# Execute cli command based on the service name
-case $2 in
-    "EC2")
-        aws ec2 describe-instances --region $1 --query 'Reservations[*].Instances[*].InstanceId' --output table
+# List the resources based on the service
+case $aws_service in
+    ec2)
+        echo "Listing EC2 Instances in $aws_region"
+        aws ec2 describe-instances --region $aws_region
         ;;
-    "DynamoDB")
-        aws dynamodb list-tables --region $1 --output table
+    rds)
+        echo "Listing RDS Instances in $aws_region"
+        aws rds describe-db-instances --region $aws_region
         ;;
-    "Lambda")
-        aws lambda list-functions --region $1 --query 'Functions[*].FunctionName' --output table
+    s3)
+        echo "Listing S3 Buckets in $aws_region"
+        aws s3api list-buckets --region $aws_region
         ;;
-    "RDS")
-        aws rds describe-db-instances --region $1 --query 'DBInstances[*].DBInstanceIdentifier' --output table
+    cloudfront)
+        echo "Listing CloudFront Distributions in $aws_region"
+        aws cloudfront list-distributions --region $aws_region
         ;;
-    "EBS")
-        aws ec2 describe-volumes --region $1 --query 'Volumes[*].VolumeId' --output table
+    vpc)
+        echo "Listing VPCs in $aws_region"
+        aws ec2 describe-vpcs --region $aws_region
         ;;
-    "CloudWatch")
-        aws cloudwatch list-metrics --region $1 --query 'Metrics[*].Namespace' --output table
+    iam)
+        echo "Listing IAM Users in $aws_region"
+        aws iam list-users --region $aws_region
         ;;
-    "SNS")
-        aws sns list-topics --region $1 --query 'Topics[*].TopicArn' --output table
+    route53)
+        echo "Listing Route53 Hosted Zones in $aws_region"
+        aws route53 list-hosted-zones --region $aws_region
         ;;
-    "SQS")
-        aws sqs list-queues --region $1 --query 'QueueUrls[*]' --output table
+    cloudwatch)
+        echo "Listing CloudWatch Alarms in $aws_region"
+        aws cloudwatch describe-alarms --region $aws_region
         ;;
-    "VPC")
-        aws ec2 describe-vpcs --region $1 --query 'Vpcs[*].VpcId' --output table
+    cloudformation)
+        echo "Listing CloudFormation Stacks in $aws_region"
+        aws cloudformation describe-stacks --region $aws_region
         ;;
-    "CloudFormation")
-        aws cloudformation list-stacks --region $1 --query 'StackSummaries[*].StackName' --output table
+    lambda)
+        echo "Listing Lambda Functions in $aws_region"
+        aws lambda list-functions --region $aws_region
+        ;;
+    sns)
+        echo "Listing SNS Topics in $aws_region"
+        aws sns list-topics --region $aws_region
+        ;;
+    sqs)
+        echo "Listing SQS Queues in $aws_region"
+        aws sqs list-queues --region $aws_region
+        ;;
+    dynamodb)
+        echo "Listing DynamoDB Tables in $aws_region"
+        aws dynamodb list-tables --region $aws_region
+        ;;
+    ebs)
+        echo "Listing EBS Volumes in $aws_region"
+        aws ec2 describe-volumes --region $aws_region
         ;;
     *)
-        echo "Service not supported. Please choose from the following services: EC2, DynamoDB, Lambda, RDS, EBS, CloudWatch, SNS, SQS, VPC, CloudFormation"
+        echo "Invalid service. Please enter a valid service."
         exit 1
+        ;;
 esac
