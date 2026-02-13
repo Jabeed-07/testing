@@ -29,10 +29,21 @@
 # Example: ./aws_resource_list.sh us-east-1 ec2
 #############################################################################
 
+<<<<<<< HEAD
 # Check if the required number of arguments are passed
 if [ $# -ne 2 ]; then
     echo "Usage: ./aws_resource_list.sh  <aws_region> <aws_service>"
     echo "Example: ./aws_resource_list.sh us-east-1 ec2"
+=======
+# Usage: ./aws_resource_list_test.sh <region> <service_name>
+# Example: ./aws_resource_list_test.sh us-east-1 EC2
+# To modify the services, edit the GLOBAL_SERVICES and REGIONAL_SERVICES arrays below
+###############################################################################################
+
+# check if the correct number of arguments are passed
+if [ "$#" -ne 2 ]; then
+    echo "Usage: ./aws_resource_list_test.sh <region> <service_name>"
+>>>>>>> 7b40a34 (changed small errors in the scripting)
     exit 1
 fi
 
@@ -46,12 +57,21 @@ if ! command -v aws &> /dev/null; then
     exit 1
 fi
 
+<<<<<<< HEAD
 # Check if the AWS CLI is configured
+=======
+#Assign the arguments to variables and convert the service to lowercase
+region=$1
+service_name=$2
+
+# Check if the aws cli is configured
+>>>>>>> 7b40a34 (changed small errors in the scripting)
 if [ ! -d ~/.aws ]; then
     echo "AWS CLI is not configured. Please configure the AWS CLI and try again."
     exit 1
 fi
 
+<<<<<<< HEAD
 # List the resources based on the service
 case $aws_service in
     ec2)
@@ -109,9 +129,45 @@ case $aws_service in
     ebs)
         echo "Listing EBS Volumes in $aws_region"
         aws ec2 describe-volumes --region $aws_region
+=======
+# Execute cli command based on the service name
+case $service_name in
+    "EC2")
+        aws ec2 describe-instances --region $region --query 'Reservations[*].Instances[*].InstanceId' --output table
+        ;;
+    "DynamoDB")
+        aws dynamodb list-tables --region $region --output table
+        ;;
+    "Lambda")
+        aws lambda list-functions --region $region --query 'Functions[*].FunctionName' --output table
+        ;;
+    "RDS")
+        aws rds describe-db-instances --region $region --query 'DBInstances[*].DBInstanceIdentifier' --output table
+        ;;
+    "EBS")
+        aws ec2 describe-volumes --region $region --query 'Volumes[*].VolumeId' --output table
+        ;;
+    "CloudWatch")
+        aws cloudwatch list-metrics --region $region --query 'Metrics[*].Namespace' --output table
+        ;;
+    "SNS")
+        aws sns list-topics --region $region --query 'Topics[*].TopicArn' --output table
+        ;;
+    "SQS")
+        aws sqs list-queues --region $region --query 'QueueUrls[*]' --output table
+        ;;
+    "VPC")
+        aws ec2 describe-vpcs --region $region --query 'Vpcs[*].VpcId' --output table
+        ;;
+    "CloudFormation")
+        aws cloudformation list-stacks --region $region --query 'StackSummaries[*].StackName' --output table
+>>>>>>> 7b40a34 (changed small errors in the scripting)
         ;;
     *)
         echo "Invalid service. Please enter a valid service."
         exit 1
+<<<<<<< HEAD
         ;;
+=======
+>>>>>>> 7b40a34 (changed small errors in the scripting)
 esac
