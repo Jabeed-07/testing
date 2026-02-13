@@ -29,7 +29,7 @@
 # Example: ./aws_resource_list.sh us-east-1 ec2
 #############################################################################
 
-<<<<<<< HEAD
+
 # Check if the required number of arguments are passed
 if [ $# -ne 2 ]; then
     echo "Usage: ./aws_resource_list.sh  <aws_region> <aws_service>"
